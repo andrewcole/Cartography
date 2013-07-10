@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 
 namespace Illallangi.Cartography.PowerShell
 {
@@ -107,9 +106,17 @@ namespace Illallangi.Cartography.PowerShell
             }
         }
 
+        #endregion Properties
+
+        #region Constructors
+
         private GeoPoint()
         {
         }
+
+        #endregion Constructors
+
+        #region Methods
 
         private static double degreesToRadians(double degrees)
         {
@@ -154,5 +161,7 @@ namespace Illallangi.Cartography.PowerShell
             Point point = this.ToPoint(bitmap.Width, bitmap.Height);
             return point;
         }
+
+        #endregion Methods
     }
 }
