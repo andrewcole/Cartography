@@ -123,7 +123,6 @@ namespace Illallangi.Cartography
 
         public IEnumerable<GeoLine> GreatCircle(int steps)
         {
-            int num;
             GeoPoint geoPoint = null;
             
             var increment = 1 / (double)(steps > 36 ? steps : 36);
