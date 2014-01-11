@@ -28,27 +28,6 @@ namespace Illallangi.Cartography
         #region Public Properties
 
         [Parameter(ValueFromPipeline = false, ValueFromPipelineByPropertyName = false)]
-        public double? CenterLongitude
-        {
-            get;
-            set;
-        }
-
-        [Parameter(ValueFromPipeline = false, ValueFromPipelineByPropertyName = false)]
-        public bool Clip
-        {
-            get;
-            set;
-        }
-
-        [Parameter(ValueFromPipelineByPropertyName = true)]
-        public int? Height
-        {
-            get;
-            set;
-        }
-
-        [Parameter(ValueFromPipeline = false, ValueFromPipelineByPropertyName = false)]
         public string Input
         {
             get;
@@ -110,9 +89,6 @@ namespace Illallangi.Cartography
         [ValidateNotNullOrEmpty]
         public ImageFormat OutputFormat { get; set; }
 
-        [Parameter(ValueFromPipeline = false, ValueFromPipelineByPropertyName = false)]
-        public int Padding { get; set; }
-        
         public GeoPoint PointA
         {
             get
@@ -327,14 +303,7 @@ namespace Illallangi.Cartography
                 return geoPoint;
             }
         }
-
-        [Parameter(ValueFromPipelineByPropertyName = true)]
-        public int? Width
-        {
-            get;
-            set;
-        }
-
+        
         #endregion
 
         #region Private Properties
@@ -383,8 +352,6 @@ namespace Illallangi.Cartography
         {
             this.Input = "DefaultInput.jpg";
             this.OutputFormat = ImageFormat.Jpeg;
-            this.Padding = 5;
-            this.Clip = false;
         }
 
         #endregion
@@ -424,65 +391,9 @@ namespace Illallangi.Cartography
 
         protected override void EndProcessing()
         {
-            double valueOrDefault;
             this.DisposeOfGraphics();
             this.Debug(string.Format("Writing out {1} {0}", Path.GetFullPath(this.Output), this.OutputFormat.ToString()));
-            bool clip = !this.Clip;
-            if (clip)
-            {
-                double? centerLongitude = this.CenterLongitude;
-                clip = !centerLongitude.HasValue;
-                if (clip)
-                {
-                    (new Bitmap(this.Bitmap)).Save(Path.GetFullPath(this.Output), this.OutputFormat);
-                }
-                else
-                {
-                    Bitmap bitmap = new Bitmap(this.Bitmap.Width, this.Bitmap.Height);
-                    try
-                    {
-                        Graphics graphics = Graphics.FromImage(bitmap);
-                        try
-                        {
-                            this.Debug(string.Format("Centering at {0}", this.CenterLongitude));
-                            double midLatitude = GeoPoint.MidLatitude;
-                            centerLongitude = this.CenterLongitude;
-                            if (centerLongitude.HasValue)
-                            {
-                                valueOrDefault = (double)((double)centerLongitude.GetValueOrDefault());
-                            }
-                            else
-                            {
-                                valueOrDefault = 0;
-                            }
-                            Point middle = GeoPoint.FromDegrees(midLatitude, valueOrDefault).ToPoint(this.Bitmap);
-                            graphics.DrawImage(this.Bitmap, -middle.X + this.Bitmap.Width / 2, 0, this.Bitmap.Width, this.Bitmap.Height);
-                            graphics.DrawImage(this.Bitmap, -middle.X + this.Bitmap.Width / 2 + this.Bitmap.Width, 0, this.Bitmap.Width, this.Bitmap.Height);
-                        }
-                        finally
-                        {
-                            clip = graphics == null;
-                            if (!clip)
-                            {
-                                graphics.Dispose();
-                            }
-                        }
-                        bitmap.Save(Path.GetFullPath(this.Output), this.OutputFormat);
-                    }
-                    finally
-                    {
-                        clip = bitmap == null;
-                        if (!clip)
-                        {
-                            bitmap.Dispose();
-                        }
-                    }
-                }
-            }
-            else
-            {
-                this.Bitmap.Save(Path.GetFullPath(this.Output), this.OutputFormat);
-            }
+            this.Bitmap.Save(Path.GetFullPath(this.Output), this.OutputFormat);
         }
 
         private static Bitmap GetBitmap(string file)
@@ -552,26 +463,8 @@ namespace Illallangi.Cartography
                     line = null == this.PointA;
                     if (!line)
                     {
-                        int? nullable = this.Height;
-                        if (nullable.HasValue)
-                        {
-                            valueOrDefault = nullable.GetValueOrDefault();
-                        }
-                        else
-                        {
-                            valueOrDefault = 64;
-                        }
-                        int height = valueOrDefault;
-                        nullable = this.Width;
-                        if (nullable.HasValue)
-                        {
-                            num = nullable.GetValueOrDefault();
-                        }
-                        else
-                        {
-                            num = 64;
-                        }
-                        int width = num;
+                        int height = 64;
+                        int width = 64;
                         if (this.Logo == null || string.IsNullOrEmpty(this.Logo.Trim()))
                         {
                             str = "Airplane.png";
