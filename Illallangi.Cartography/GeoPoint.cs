@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace Illallangi.Cartography.PowerShell
+namespace Illallangi.Cartography
 {
     public class GeoPoint
     {

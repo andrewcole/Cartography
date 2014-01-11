@@ -6,7 +6,7 @@ using System.IO;
 using System.Management.Automation;
 using System.Reflection;
 
-namespace Illallangi.Cartography.PowerShell
+namespace Illallangi.Cartography
 {
     [Cmdlet("New", "Map")]
     public class NewMap : Cmdlet

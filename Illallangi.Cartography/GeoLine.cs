@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 
-namespace Illallangi.Cartography.PowerShell
+namespace Illallangi.Cartography
 {
     public class GeoLine
     {

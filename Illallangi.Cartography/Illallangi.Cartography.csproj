@@ -5,7 +5,7 @@
     <SchemaVersion>2</SchemaVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <AssemblyName>Illallangi.Cartography.PowerShell</AssemblyName>
+    <AssemblyName>Illallangi.Cartography</AssemblyName>
     <OutputType>Library</OutputType>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile />
@@ -31,7 +31,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <RootNamespace>Illallangi.Cartography.PowerShell</RootNamespace>
+    <RootNamespace>Illallangi.Cartography</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />

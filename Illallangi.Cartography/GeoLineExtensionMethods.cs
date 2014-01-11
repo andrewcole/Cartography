@@ -2,7 +2,7 @@
 using System.Drawing;
 using System;
 
-namespace Illallangi.Cartography.PowerShell
+namespace Illallangi.Cartography
 {
 public static class GeoLineExtensionMethods
 {
