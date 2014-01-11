@@ -6,59 +6,47 @@ namespace Illallangi.Cartography
 {
     public class GeoLine
     {
-        public GeoPoint A
-        {
-            get;
-            set;
-        }
-
-        public GeoPoint B
-        {
-            get;
-            set;
-        }
-
+        private GeoPoint A { get; set; }
+    
+        private GeoPoint B { get; set; }
+        
         public double GeoDistanceAsRadians
         {
             get
             {
-                return 2 * Math.Asin(Math.Sqrt(Math.Pow(Math.Sin((this.lat1 - this.lat2) / 2), 2) + Math.Cos(this.lat1) * Math.Cos(this.lat2) * Math.Pow(Math.Sin((this.lon1 - this.lon2) / 2), 2)));
+                return 2 * Math.Asin(Math.Sqrt(Math.Pow(Math.Sin((this.Latitude1 - this.Latitude2) / 2), 2) + Math.Cos(this.Latitude1) * Math.Cos(this.Latitude2) * Math.Pow(Math.Sin((this.Longitude1 - this.Longitude2) / 2), 2)));
             }
         }
 
-        private double lat1
+        private double Latitude1
         {
             get
             {
-                double latitudeRadians = this.A.LatitudeRadians;
-                return latitudeRadians;
+                return this.A.LatitudeRadians;
             }
         }
 
-        private double lat2
+        private double Latitude2
         {
             get
             {
-                double latitudeRadians = this.B.LatitudeRadians;
-                return latitudeRadians;
+                return this.B.LatitudeRadians;
             }
         }
 
-        private double lon1
+        private double Longitude1
         {
             get
             {
-                double longitudeRadians = this.A.LongitudeRadians;
-                return longitudeRadians;
+                return this.A.LongitudeRadians;
             }
         }
 
-        private double lon2
+        private double Longitude2
         {
             get
             {
-                double longitudeRadians = this.B.LongitudeRadians;
-                return longitudeRadians;
+                return this.B.LongitudeRadians;
             }
         }
 
@@ -102,23 +90,12 @@ namespace Illallangi.Cartography
                     point = point1;
                     point1 = point2;
                 }
+
                 double num = (double)point.X / ((double)point.X + (double)bitmap.Width - (double)point1.X);
                 double y = (double)point.Y - (double)(point.Y - point1.Y) * num;
                 yield return new KeyValuePair<Point, Point>(point, new Point(0, (int)y));
                 yield return new KeyValuePair<Point, Point>(new Point(bitmap.Width, (int)y), point1);
             }
-        }
-
-        public Rectangle GetRectangle(Bitmap bitmap, int padding)
-        {
-            Point a1 = this.A.ToPoint(bitmap);
-            Point b1 = this.B.ToPoint(bitmap);
-            int x = Math.Min(a1.X, b1.X);
-            int y = Math.Min(a1.Y, b1.Y);
-            int width = Math.Max(a1.X, b1.X) - x;
-            int height = Math.Max(a1.Y, b1.Y) - y;
-            Rectangle rectangle = new Rectangle(x - padding, y - padding, width + padding + padding, height + padding + padding);
-            return rectangle;
         }
 
         public IEnumerable<GeoLine> GreatCircle(int steps)
@@ -138,9 +115,9 @@ namespace Illallangi.Cartography
                 double a = Math.Sin((1 - f) * this.GeoDistanceAsRadians) / Math.Sin(this.GeoDistanceAsRadians);
                 double b = Math.Sin(f * this.GeoDistanceAsRadians) / Math.Sin(this.GeoDistanceAsRadians);
 
-                double x = a * Math.Cos(this.lat1) * Math.Cos(this.lon1) + b * Math.Cos(this.lat2) * Math.Cos(this.lon2);
-                double y = a * Math.Cos(this.lat1) * Math.Sin(this.lon1) + b * Math.Cos(this.lat2) * Math.Sin(this.lon2);
-                double z = a * Math.Sin(this.lat1) + b * Math.Sin(this.lat2);
+                double x = a * Math.Cos(this.Latitude1) * Math.Cos(this.Longitude1) + b * Math.Cos(this.Latitude2) * Math.Cos(this.Longitude2);
+                double y = a * Math.Cos(this.Latitude1) * Math.Sin(this.Longitude1) + b * Math.Cos(this.Latitude2) * Math.Sin(this.Longitude2);
+                double z = a * Math.Sin(this.Latitude1) + b * Math.Sin(this.Latitude2);
 
                 double lat = Math.Atan2(z, Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2)));
                 double lon = Math.Atan2(y, x);
@@ -150,6 +127,7 @@ namespace Illallangi.Cartography
                 {
                     yield return new GeoLine(geoPoint, geoPoint1);
                 }
+
                 geoPoint = geoPoint1;
                 f = f + increment;
             }
