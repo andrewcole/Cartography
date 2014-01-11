@@ -1,0 +1,131 @@
+<?define Manufacturer="Illallangi" ?>
+<?define AppName="Flight Log" ?>
+<?define Version="0.0.0.1" ?>
+
+<?if $(sys.BUILDARCH)=x64 ?>
+<?define Win64="yes" ?>
+<?define PlatformProgramFilesFolder="ProgramFiles64Folder" ?>
+<?define PlatformSystemFolder="System64Folder" ?>
+<?define ProductId="{03E809F2-9025-4A0C-8DCE-C4B79A50FF1B}" ?>
+<?define UpgradeCode="{5A90E5E8-C6FF-4897-851B-AD45F6800D83}" ?>
+<?else ?>
+<?define Win64="no" ?>
+<?define PlatformProgramFilesFolder="ProgramFilesFolder" ?>
+<?define PlatformSystemFolder="SystemFolder" ?>
+<?define ProductId="{416AB355-A863-4DDE-8C94-80C01FBD0C39}" ?>
+<?define UpgradeCode="{31A86496-2A52-49EE-826E-4D26A5BB47B0}" ?>
+<?endif ?>
+
+<Wix xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Name="$(var.AppName) $(sys.BUILDARCH) v$(var.Version)"
+           Manufacturer="$(var.Manufacturer)"
+           Version="$(var.Version)"
+           Id="$(var.ProductId)"
+           UpgradeCode="$(var.UpgradeCode)"
+           Language="1033"
+           Codepage="1252" >
+
+    <Package InstallerVersion="200" Compressed="yes" Id="*" />
+    <Media Id="1" Cabinet="package.cab" EmbedCab="yes" />
+
+    <Upgrade Id="$(var.UpgradeCode)">
+      <UpgradeVersion Minimum="$(var.Version)"
+                      IncludeMinimum="no"
+                      OnlyDetect="yes"
+                      Language="1033"
+                      Property="NEWPRODUCTFOUND"/>
+
+      <UpgradeVersion Maximum="$(var.Version)"
+                      IncludeMaximum="no"
+                      OnlyDetect="no"
+                      Language="1033"
+                      Property="OLDPRODUCTFOUND"/>
+    </Upgrade>
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Component Id="Empty" Guid="" />
+      <Directory Id="$(var.PlatformSystemFolder)">
+        <Directory Id="WindowsPowerShell" Name="WindowsPowerShell">
+          <Directory Id="v1.0" Name="v1.0">
+            <Directory Id="Modules" Name="Modules">
+              <Directory Id="SOFTWAREDIR" Name="Illallangi.FlightLog" />
+            </Directory>
+          </Directory>
+        </Directory>
+      </Directory>
+    </Directory>
+
+    <!--
+    <Icon Id="favicon.ico" SourceFile="$(var.source)\favicon.ico" />
+    -->
+    <Property Id="ALLUSERS" Value="1" />
+    <Property Id="ARPPRODUCTICON" Value="favicon.ico" />
+    <Property Id="ARPNOMODIFY" Value="1" />
+
+    <Feature Id="Complete" Level="1" Title="$(var.AppName)">
+      <Component Id="IllallangiFlightLogDllC" Directory="SOFTWAREDIR" Guid="{21165B21-1DD8-443B-BD5A-0031FFA138A9}" Permanent="yes" >
+        <File Id="IllallangiFlightLogDllF" KeyPath="yes" Source="$(var.source)\Illallangi.FlightLog.dll" />
+        <File Id="IllallangiFlightLogDllConfigF" KeyPath="no" Source="$(var.source)\Illallangi.FlightLog.dll.config" />
+        <File Id="IllallangiFlightLogPsd1F" KeyPath="no" Source="$(var.source)\Illallangi.FlightLog.psd1" />
+        <File Id="IllallangiFlightLogPsm1F" KeyPath="no" Source="$(var.source)\Illallangi.FlightLog.psm1" />
+        <File Id="IllallangiFlightLogSql1F" KeyPath="no" Source="$(var.source)\Illallangi.FlightLog.sql" />
+      </Component>
+
+      <Component Id="IllallangiLiteOrmC" Directory="SOFTWAREDIR" Guid="{4386B7A3-0F92-4684-B2DE-63FADCE31C94}" Permanent="yes" >
+        <File Id="IllallangiLiteOrmF" KeyPath="yes" Source="$(var.source)\Illallangi.LiteOrm.dll" />
+      </Component>
+      <Component Id="SystemDataSQLiteDllC" Directory="SOFTWAREDIR" Guid="{F7D45499-2682-49CB-B591-E72DEA61D974}" Permanent="yes" >
+        <File Id="SystemDataSQLiteDllF" KeyPath="yes" Source="$(var.source)\System.Data.SQLite.dll" />
+      </Component>
+      <Component Id="SystemDataSQLiteLinqDllC" Directory="SOFTWAREDIR" Guid="{AFD94AA5-5CA2-41C4-B2D3-65969213A6E2}" Permanent="yes" >
+        <File Id="SystemDataSQLiteLinqDllF" KeyPath="yes" Source="$(var.source)\System.Data.SQLite.Linq.dll" />
+      </Component>
+      <Component Id="SQLiteInteropDllC" Directory="SOFTWAREDIR" Guid="{BAD4C637-C327-4B7A-9775-DB37A56BA505}" Permanent="yes" >
+        <File Id="SQLiteInteropDllF" KeyPath="yes" Source="$(var.source)\SQLite.Interop.dll" />
+      </Component>
+      <Component Id="ZumeroDllC" Directory="SOFTWAREDIR" Guid="{92A0DF57-A5CB-4EFD-B312-81D8515B6DCA}" Permanent="yes" >
+        <File Id="ZumeroDllF" KeyPath="yes" Source="$(var.source)\zumero.dll" />
+      </Component>
+
+      <Component Id="NinjectDllC" Directory="SOFTWAREDIR" Guid="{89E2AF78-FC82-4A10-AF1C-3B86AF060680}" Permanent="yes" >
+        <File Id="NinjectDllF" KeyPath="yes" Source="$(var.source)\ninject.dll" />
+      </Component>
+      <ComponentRef Id="Empty" />
+    </Feature>
+
+
+    <UI Id="Minimal">
+      <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
+      <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
+      <TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
+      <Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
+      <Property Id="WixUI_Mode" Value="Minimal" />
+      <DialogRef Id="ErrorDlg" />
+      <DialogRef Id="FatalError" />
+      <DialogRef Id="FilesInUse" />
+      <DialogRef Id="MsiRMFilesInUse" />
+      <DialogRef Id="PrepareDlg" />
+      <DialogRef Id="ProgressDlg" />
+      <DialogRef Id="ResumeDlg" />
+      <DialogRef Id="UserExit" />
+      <DialogRef Id="WelcomeDlg" />
+      <DialogRef Id="VerifyReadyDlg" />
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>
+      <Publish Dialog='ExitDialog' Control='Finish' Event='EndDialog' Value='Return'>1</Publish>
+    </UI>
+
+    <UIRef Id="WixUI_Common" />
+
+    <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
+
+    <InstallExecuteSequence>
+      <RemoveExistingProducts After="InstallInitialize" />
+      <Custom Action="PreventDowngrading" After="FindRelatedProducts">NEWPRODUCTFOUND</Custom>
+    </InstallExecuteSequence>
+
+    <InstallUISequence>
+      <Custom Action="PreventDowngrading" After="FindRelatedProducts">NEWPRODUCTFOUND</Custom>
+    </InstallUISequence>
+  </Product>
+</Wix>
