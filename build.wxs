@@ -1,19 +1,19 @@
 <?define Manufacturer="Illallangi" ?>
-<?define AppName="Flight Log" ?>
+<?define AppName="Cartography" ?>
 <?define Version="0.0.0.1" ?>
 
 <?if $(sys.BUILDARCH)=x64 ?>
 <?define Win64="yes" ?>
 <?define PlatformProgramFilesFolder="ProgramFiles64Folder" ?>
 <?define PlatformSystemFolder="System64Folder" ?>
-<?define ProductId="{03E809F2-9025-4A0C-8DCE-C4B79A50FF1B}" ?>
-<?define UpgradeCode="{5A90E5E8-C6FF-4897-851B-AD45F6800D83}" ?>
+<?define ProductId="{C4DCB517-2929-4F91-BA7F-B48A7D87D330}" ?>
+<?define UpgradeCode="{83650C35-BD14-43BB-B2D0-716FF51793C5}" ?>
 <?else ?>
 <?define Win64="no" ?>
 <?define PlatformProgramFilesFolder="ProgramFilesFolder" ?>
 <?define PlatformSystemFolder="SystemFolder" ?>
-<?define ProductId="{416AB355-A863-4DDE-8C94-80C01FBD0C39}" ?>
-<?define UpgradeCode="{31A86496-2A52-49EE-826E-4D26A5BB47B0}" ?>
+<?define ProductId="{DBD190D2-4975-486A-8653-A3AB6DF7EB81}" ?>
+<?define UpgradeCode="{3DF0153B-4520-4AA0-B086-3F92B71B0306}" ?>
 <?endif ?>
 
 <Wix xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.microsoft.com/wix/2006/wi">
@@ -48,7 +48,7 @@
         <Directory Id="WindowsPowerShell" Name="WindowsPowerShell">
           <Directory Id="v1.0" Name="v1.0">
             <Directory Id="Modules" Name="Modules">
-              <Directory Id="SOFTWAREDIR" Name="Illallangi.FlightLog" />
+              <Directory Id="SOFTWAREDIR" Name="Illallangi.Cartography" />
             </Directory>
           </Directory>
         </Directory>
@@ -63,32 +63,10 @@
     <Property Id="ARPNOMODIFY" Value="1" />
 
     <Feature Id="Complete" Level="1" Title="$(var.AppName)">
-      <Component Id="IllallangiFlightLogDllC" Directory="SOFTWAREDIR" Guid="{21165B21-1DD8-443B-BD5A-0031FFA138A9}" Permanent="yes" >
-        <File Id="IllallangiFlightLogDllF" KeyPath="yes" Source="$(var.source)\Illallangi.FlightLog.dll" />
-        <File Id="IllallangiFlightLogDllConfigF" KeyPath="no" Source="$(var.source)\Illallangi.FlightLog.dll.config" />
-        <File Id="IllallangiFlightLogPsd1F" KeyPath="no" Source="$(var.source)\Illallangi.FlightLog.psd1" />
-        <File Id="IllallangiFlightLogPsm1F" KeyPath="no" Source="$(var.source)\Illallangi.FlightLog.psm1" />
-        <File Id="IllallangiFlightLogSql1F" KeyPath="no" Source="$(var.source)\Illallangi.FlightLog.sql" />
-      </Component>
-
-      <Component Id="IllallangiLiteOrmC" Directory="SOFTWAREDIR" Guid="{4386B7A3-0F92-4684-B2DE-63FADCE31C94}" Permanent="yes" >
-        <File Id="IllallangiLiteOrmF" KeyPath="yes" Source="$(var.source)\Illallangi.LiteOrm.dll" />
-      </Component>
-      <Component Id="SystemDataSQLiteDllC" Directory="SOFTWAREDIR" Guid="{F7D45499-2682-49CB-B591-E72DEA61D974}" Permanent="yes" >
-        <File Id="SystemDataSQLiteDllF" KeyPath="yes" Source="$(var.source)\System.Data.SQLite.dll" />
-      </Component>
-      <Component Id="SystemDataSQLiteLinqDllC" Directory="SOFTWAREDIR" Guid="{AFD94AA5-5CA2-41C4-B2D3-65969213A6E2}" Permanent="yes" >
-        <File Id="SystemDataSQLiteLinqDllF" KeyPath="yes" Source="$(var.source)\System.Data.SQLite.Linq.dll" />
-      </Component>
-      <Component Id="SQLiteInteropDllC" Directory="SOFTWAREDIR" Guid="{BAD4C637-C327-4B7A-9775-DB37A56BA505}" Permanent="yes" >
-        <File Id="SQLiteInteropDllF" KeyPath="yes" Source="$(var.source)\SQLite.Interop.dll" />
-      </Component>
-      <Component Id="ZumeroDllC" Directory="SOFTWAREDIR" Guid="{92A0DF57-A5CB-4EFD-B312-81D8515B6DCA}" Permanent="yes" >
-        <File Id="ZumeroDllF" KeyPath="yes" Source="$(var.source)\zumero.dll" />
-      </Component>
-
-      <Component Id="NinjectDllC" Directory="SOFTWAREDIR" Guid="{89E2AF78-FC82-4A10-AF1C-3B86AF060680}" Permanent="yes" >
-        <File Id="NinjectDllF" KeyPath="yes" Source="$(var.source)\ninject.dll" />
+      <Component Id="IllallangiCartographyDllC" Directory="SOFTWAREDIR" Guid="{508ADD20-D8EE-4DD5-B96D-6B5C4EA8CA6F}" Permanent="yes" >
+        <File Id="IllallangiCartographyDllF" KeyPath="yes" Source="$(var.source)\Illallangi.Cartography.dll" />
+        <File Id="IllallangiCartographyPsd1F" KeyPath="no" Source="$(var.source)\Illallangi.Cartography.psd1" />
+        <File Id="IllallangiCartographyPsm1F" KeyPath="no" Source="$(var.source)\Illallangi.Cartography.psm1" />
       </Component>
       <ComponentRef Id="Empty" />
     </Feature>
