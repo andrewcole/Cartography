@@ -3,29 +3,44 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Management.Automation;
 using System.Reflection;
 
 namespace Illallangi.Cartography
 {
-    [Cmdlet("New", "Map")]
-    public class NewMap : Cmdlet
+    [Cmdlet(VerbsCommon.New, @"Map", DefaultParameterSetName = "Point")]
+    public class NewMap : PSCmdlet
     {
         #region Constants
+
+        private const string Point = @"Point";
+
+        private const string Line = @"Line";
 
         #endregion
 
         #region Fields
 
-        private Bitmap currentBitmap;
+        private Stream currentInputStream;
 
-        private Graphics currentGraphics;
+        private Bitmap currentInputBitmap;
+
+        private Graphics currentInputGraphics;
+
+        private Bitmap currentIconBitmap;
+
+        private Stream currentIconStream;
 
         private ImageFormat currentOutputFormat = ImageFormat.Jpeg;
 
         private string currentInputPath = @"BlueMarble.jpg";
 
         private string currentIconPath = @"Airport.png";
+
+        private Brush currentLineColor = Brushes.HotPink;
+
+        private int currentLineWidth = 2;
 
         #endregion
 
@@ -66,499 +81,348 @@ namespace Illallangi.Cartography
 
         #endregion
 
-        [Parameter(ValueFromPipelineByPropertyName = true)]
-        public double? OriginLatitude { get; set; }
-        
-        [Parameter(ValueFromPipelineByPropertyName = true)]
-        public double? DestinationLatitude { get; set; }
+        #region Point Parameters
 
-        public GeoLine Line
-        {
-            get
-            {
-                bool pointB;
-                if (this.PointA == null)
-                {
-                    pointB = false;
-                }
-                else
-                {
-                    pointB = null != this.PointB;
-                }
+        [ValidateRange(-90, 90)]
+        [Parameter(Mandatory = true, ValueFromPipeline = false, ValueFromPipelineByPropertyName = true, ParameterSetName = NewMap.Point)]
+        public float Latitude { get; set; }
 
-                bool flag = pointB;
-                GeoLine geoLine = flag ? new GeoLine(this.PointA, this.PointB) : null;
-                return geoLine;
-            }
-        }
+        [ValidateRange(-180, 180)]
+        [Parameter(Mandatory = true, ValueFromPipeline = false, ValueFromPipelineByPropertyName = true, ParameterSetName = NewMap.Point)]
+        public float Longitude { get; set; }
 
-        [Parameter(Mandatory = false, ValueFromPipeline = false, ValueFromPipelineByPropertyName = true)]
+        [Parameter(Mandatory = false, ValueFromPipeline = false, ValueFromPipelineByPropertyName = true, ParameterSetName = NewMap.Point)]
         public string IconPath
         {
             get
             {
+                this.currentIconBitmap = null;
+                this.currentIconStream = null;
                 return this.currentIconPath;
             }
+
             set
             {
                 this.currentIconPath = value;
             }
         }
 
-        [Parameter(ValueFromPipelineByPropertyName = true)]
-        public double? OriginLongitude { get; set; }
-        
-        [Parameter(ValueFromPipelineByPropertyName = true)]
-        public double? DestinationLongitude { get; set; }
-        
-        [Alias("PointName")]
-        [Parameter(ValueFromPipelineByPropertyName = true)]
-        public string Name { get; set; }
+        #endregion
 
-        public GeoPoint PointA
+        #region Line Parameters
+
+        [ValidateRange(-90, 90)]
+        [Parameter(Mandatory = true, ValueFromPipeline = false, ValueFromPipelineByPropertyName = true, ParameterSetName = NewMap.Line)]
+        public float OriginLatitude { get; set; }
+
+        [ValidateRange(-180, 180)]
+        [Parameter(Mandatory = true, ValueFromPipeline = false, ValueFromPipelineByPropertyName = true, ParameterSetName = NewMap.Line)]
+        public float OriginLongitude { get; set; }
+
+        [ValidateRange(-90, 90)]
+        [Parameter(Mandatory = true, ValueFromPipeline = false, ValueFromPipelineByPropertyName = true, ParameterSetName = NewMap.Line)]
+        public float DestinationLatitude { get; set; }
+
+        [ValidateRange(-180, 180)]
+        [Parameter(Mandatory = true, ValueFromPipeline = false, ValueFromPipelineByPropertyName = true, ParameterSetName = NewMap.Line)]
+        public float DestinationLongitude { get; set; }
+
+        [Parameter(Mandatory = false, ValueFromPipeline = false, ValueFromPipelineByPropertyName = true, ParameterSetName = NewMap.Line)]
+        public Brush LineColor
         {
             get
             {
-                GeoPoint geoPoint;
-                bool flag;
-                bool flag1;
-                double valueOrDefault;
-                double num;
-                bool hasValue1;
-                double? longitudeA = this.OriginLongitude;
-                if (longitudeA.HasValue)
-                {
-                    longitudeA = this.OriginLatitude;
-                    if (!longitudeA.HasValue)
-                    {
-                        flag1 = false;
-                        flag = flag1;
-                        if (flag)
-                        {
-                            longitudeA = this.OriginLatitude;
-                            if (longitudeA.HasValue)
-                            {
-                                valueOrDefault = (double)((double)longitudeA.GetValueOrDefault());
-                            }
-                            else
-                            {
-                                valueOrDefault = 0;
-                            }
-                            longitudeA = this.OriginLongitude;
-                            if (longitudeA.HasValue)
-                            {
-                                num = (double)((double)longitudeA.GetValueOrDefault());
-                            }
-                            else
-                            {
-                                num = 0;
-                            }
-                            geoPoint = GeoPoint.FromDegrees(valueOrDefault, num);
-                        }
-                        else
-                        {
-                            geoPoint = null;
-                        }
-                        return geoPoint;
-                    }
-                    longitudeA = this.OriginLongitude;
-                    bool hasValue;
-                    hasValue = longitudeA.GetValueOrDefault() == 0 && longitudeA.HasValue;
-                    longitudeA = this.OriginLatitude;
-                    hasValue1 = longitudeA.GetValueOrDefault() == 0 && longitudeA.HasValue;
-                    flag1 = !(hasValue & hasValue1);
-                    flag = flag1;
-                    if (flag)
-                    {
-                        longitudeA = this.OriginLatitude;
-                        if (longitudeA.HasValue)
-                        {
-                            valueOrDefault = (double)longitudeA.GetValueOrDefault();
-                        }
-                        else
-                        {
-                            valueOrDefault = 0;
-                        }
-
-                        longitudeA = this.OriginLongitude;
-                        if (longitudeA.HasValue)
-                        {
-                            num = longitudeA.GetValueOrDefault();
-                        }
-                        else
-                        {
-                            num = 0;
-                        }
-
-                        geoPoint = GeoPoint.FromDegrees(valueOrDefault, num);
-                    }
-                    else
-                    {
-                        geoPoint = null;
-                    }
-
-                    return geoPoint;
-                }
-                return null;
+                return this.currentLineColor;
+            }
+            set
+            {
+                this.currentLineColor = value;
             }
         }
 
-        public GeoPoint PointB
+        [Parameter(Mandatory = false, ValueFromPipeline = false, ValueFromPipelineByPropertyName = true, ParameterSetName = NewMap.Line)]
+        public int LineWidth
         {
             get
             {
-                GeoPoint geoPoint;
-                bool flag;
-                bool flag1;
-                double valueOrDefault;
-                double num;
-                bool hasValue1;
-                double? longitudeB = this.DestinationLongitude;
-                if (longitudeB.HasValue)
-                {
-                    longitudeB = this.DestinationLatitude;
-                    if (!longitudeB.HasValue)
-                    {
-                        flag1 = false;
-                        flag = flag1;
-                        if (flag)
-                        {
-                            longitudeB = this.DestinationLatitude;
-                            if (longitudeB.HasValue)
-                            {
-                                valueOrDefault = (double)((double)longitudeB.GetValueOrDefault());
-                            }
-                            else
-                            {
-                                valueOrDefault = 0;
-                            }
-                            longitudeB = this.DestinationLongitude;
-                            if (longitudeB.HasValue)
-                            {
-                                num = (double)((double)longitudeB.GetValueOrDefault());
-                            }
-                            else
-                            {
-                                num = 0;
-                            }
-                            geoPoint = GeoPoint.FromDegrees(valueOrDefault, num);
-                        }
-                        else
-                        {
-                            geoPoint = null;
-                        }
-                        return geoPoint;
-                    }
-                    longitudeB = this.DestinationLongitude;
-                    bool hasValue;
-                    if ((double)longitudeB.GetValueOrDefault() != 0)
-                    {
-                        hasValue = false;
-                    }
-                    else
-                    {
-                        hasValue = longitudeB.HasValue;
-                    }
-                    longitudeB = this.DestinationLatitude;
-                    if ((double)longitudeB.GetValueOrDefault() != 0)
-                    {
-                        hasValue1 = false;
-                    }
-                    else
-                    {
-                        hasValue1 = longitudeB.HasValue;
-                    }
-                    flag1 = !(hasValue & hasValue1);
-                    flag = flag1;
-                    if (flag)
-                    {
-                        longitudeB = this.DestinationLatitude;
-                        if (longitudeB.HasValue)
-                        {
-                            valueOrDefault = (double)((double)longitudeB.GetValueOrDefault());
-                        }
-                        else
-                        {
-                            valueOrDefault = 0;
-                        }
-                        longitudeB = this.DestinationLongitude;
-                        if (longitudeB.HasValue)
-                        {
-                            num = (double)((double)longitudeB.GetValueOrDefault());
-                        }
-                        else
-                        {
-                            num = 0;
-                        }
-                        geoPoint = GeoPoint.FromDegrees(valueOrDefault, num);
-                    }
-                    else
-                    {
-                        geoPoint = null;
-                    }
-                    return geoPoint;
-                }
-                flag1 = false;
-                flag = flag1;
-                if (flag)
-                {
-                    longitudeB = this.DestinationLatitude;
-                    if (longitudeB.HasValue)
-                    {
-                        valueOrDefault = (double)((double)longitudeB.GetValueOrDefault());
-                    }
-                    else
-                    {
-                        valueOrDefault = 0;
-                    }
-                    longitudeB = this.DestinationLongitude;
-                    if (longitudeB.HasValue)
-                    {
-                        num = (double)((double)longitudeB.GetValueOrDefault());
-                    }
-                    else
-                    {
-                        num = 0;
-                    }
-                    geoPoint = GeoPoint.FromDegrees(valueOrDefault, num);
-                }
-                else
-                {
-                    geoPoint = null;
-                }
-                return geoPoint;
+                return this.currentLineWidth;
+            }
+            set
+            {
+                this.currentLineWidth = value;
             }
         }
-        
+
+        #endregion
+
         #endregion
 
         #region Private Properties
 
-        private Graphics Graphics
+        private Stream InputStream
         {
             get
             {
-                Graphics graphic = this.currentGraphics;
-                Graphics graphic1 = graphic;
-                if (graphic == null)
+                return this.currentInputStream ?? (this.currentInputStream = NewMap.GetStream(this.InputPath));
+            }
+        }
+
+        private Bitmap InputBitmap
+        {
+            get
+            {
+                return this.currentInputBitmap ?? (this.currentInputBitmap = NewMap.GetBitmap(this.InputStream));
+            }
+        }
+
+        private Graphics InputGraphics
+        {
+            get
+            {
+                return this.currentInputGraphics ?? (this.currentInputGraphics = NewMap.GetGraphics(this.InputBitmap));
+            }
+        }
+
+        private int InputHeight
+        {
+            get
+            {
+                return this.InputBitmap.Height;
+            }
+        }
+
+        private int InputWidth
+        {
+            get
+            {
+                return this.InputBitmap.Width;
+            }
+        }
+
+        private Stream IconStream
+        {
+            get
+            {
+                return this.currentIconStream ?? (this.currentIconStream = NewMap.GetStream(this.IconPath));
+            }
+        }
+
+        private Bitmap IconBitmap
+        {
+            get
+            {
+                return this.currentIconBitmap ?? (this.currentIconBitmap = NewMap.GetBitmap(this.IconStream));
+            }
+        }
+
+        private int IconHeight
+        {
+            get
+            {
+                if (NewMap.Point != this.ParameterSetName)
                 {
-                    Graphics graphic2 = Graphics.FromImage(this.Bitmap);
-                    Graphics graphic3 = graphic2;
-                    this.currentGraphics = graphic2;
-                    graphic1 = graphic3;
+                    throw new InvalidOperationException("Attempted to get IconHeight when ParameterSet is not Point");
                 }
 
-                Graphics graphic4 = graphic1;
-                return graphic4;
+                return this.IconBitmap.Height;
             }
         }
 
-        private Bitmap Bitmap
+        private int IconWidth
         {
             get
             {
-                Bitmap bitmap = this.currentBitmap;
-                return bitmap;
-            }
+                if (NewMap.Point != this.ParameterSetName)
+                {
+                    throw new InvalidOperationException("Attempted to get IconWidth when ParameterSet is not Point");
+                }
 
-            set
-            {
-                this.currentGraphics = null;
-                this.currentBitmap = value;
+                return this.IconBitmap.Width;
             }
         }
 
-        #endregion
-
-        #endregion
-
-        #region Constructor
-
-        public NewMap()
+        private float X
         {
-            this.InputPath = "DefaultInput.jpg";
-            this.OutputFormat = ImageFormat.Jpeg;
+            get
+            {
+                if (NewMap.Point != this.ParameterSetName)
+                {
+                    throw new InvalidOperationException("Attempted to get X when ParameterSet is not Point");
+                }
+
+                return ((this.Longitude + 180) / 360) * this.InputBitmap.Width;
+            }
         }
+
+        private float Y
+        {
+            get
+            {
+                if (NewMap.Point != this.ParameterSetName)
+                {
+                    throw new InvalidOperationException("Attempted to get Y when ParameterSet is not Point");
+                }
+
+                return ((180 - (this.Latitude + 90)) / 180) * this.InputBitmap.Height;
+            }
+        }
+
+        private int OriginX
+        {
+            get
+            {
+                if (NewMap.Line != this.ParameterSetName)
+                {
+                    throw new InvalidOperationException("Attempted to get OriginX when ParameterSet is not Line");
+                }
+
+                return (int)(((this.OriginLongitude + 180) / 360) * this.InputBitmap.Width);
+            }
+        }
+
+        private int OriginY
+        {
+            get
+            {
+                if (NewMap.Line != this.ParameterSetName)
+                {
+                    throw new InvalidOperationException("Attempted to get OriginY when ParameterSet is not Line");
+                }
+
+                return (int)(((180 - (this.OriginLatitude + 90)) / 180) * this.InputBitmap.Height);
+            }
+        }
+
+        private double OriginLatitudeRadian
+        {
+            get
+            {
+                return this.OriginLatitude * (Math.PI / 180);
+            }
+        }
+
+        private double OriginLongitudeRadian
+        {
+            get
+            {
+                return this.OriginLongitude * (Math.PI / 180);
+            }
+        }
+
+        private double DestinationLatitudeRadian
+        {
+            get
+            {
+                return this.DestinationLatitude * (Math.PI / 180);
+            }
+        }
+
+        private double DestinationLongitudeRadian
+        {
+            get
+            {
+                return this.DestinationLongitude * (Math.PI / 180);
+            }
+        }
+
+        private int DestinationX
+        {
+            get
+            {
+                if (NewMap.Line != this.ParameterSetName)
+                {
+                    throw new InvalidOperationException("Attempted to get DestinationX when ParameterSet is not Line");
+                }
+
+                return (int)(((this.DestinationLongitude + 180) / 360) * this.InputBitmap.Width);
+            }
+        }
+
+        private int DestinationY
+        {
+            get
+            {
+                if (NewMap.Line != this.ParameterSetName)
+                {
+                    throw new InvalidOperationException("Attempted to get DestinationY when ParameterSet is not Line");
+                }
+
+                return (int)(((180 - (this.DestinationLatitude + 90)) / 180) * this.InputBitmap.Height);
+            }
+        }
+
+        #endregion
 
         #endregion
 
         #region Methods
 
-        protected override void BeginProcessing()
-        {
-            try
-            {
-                this.Debug("Loading Bitmap");
-                this.Bitmap = NewMap.GetBitmap(this.InputPath);
-                this.Debug("Done");
-            }
-            catch (Exception exception)
-            {
-                Exception e = exception;
-                this.Debug(e.ToString());
-                throw e;
-            }
-        }
+        #region Protected Methods
 
-        protected virtual void Debug(string message)
+        protected override void ProcessRecord()
         {
-            base.WriteDebug(message);
-        }
-
-        private void DisposeOfGraphics()
-        {
-            bool flag = null == this.currentGraphics;
-            if (!flag)
+            switch (this.ParameterSetName)
             {
-                this.currentGraphics.Dispose();
-                this.currentGraphics = null;
+                case NewMap.Point:
+                    // ReSharper disable PossibleLossOfFraction
+                    this.InputGraphics.DrawImage(
+                        this.IconBitmap,
+                        this.X - (this.IconWidth / 2),
+                        this.Y - (this.IconHeight / 2),
+                        this.IconWidth,
+                        this.IconHeight);
+                    // ReSharper restore PossibleLossOfFraction
+                    break;
+
+                case NewMap.Line:
+                    this.InputGraphics.DrawLine(
+                        new Pen(Brushes.HotPink, 4),
+                        new Point(this.OriginX, this.OriginY),
+                        new Point(this.DestinationX, this.DestinationY));
+                    break;
+
+                default:
+                    throw new NotImplementedException();
             }
         }
 
         protected override void EndProcessing()
         {
-            this.DisposeOfGraphics();
-            this.Debug(string.Format("Writing out {1} {0}", Path.GetFullPath(this.OutputPath), this.OutputFormat.ToString()));
-            this.Bitmap.Save(Path.GetFullPath(this.OutputPath), this.OutputFormat);
+            this.InputBitmap.Save(Path.GetFullPath(this.OutputPath), this.OutputFormat);
         }
 
-        private static Bitmap GetBitmap(string file)
+        #endregion
+
+        #region Private Methods
+
+        private static Stream GetStream(string path)
         {
-            Bitmap bitmap;
-            Stream stream = NewMap.GetStream(file);
-            try
+            if (File.Exists(Path.GetFullPath(path)))
             {
-                bitmap = new Bitmap(stream);
+                return new FileStream(Path.GetFullPath(path), FileMode.Open);
             }
-            finally
+
+            var ass = Assembly.GetAssembly(typeof(NewMap));
+
+            foreach (var resourceName in ass.GetManifestResourceNames().Where(resourceName => resourceName.EndsWith(path, StringComparison.InvariantCultureIgnoreCase)))
             {
-                bool flag = stream == null;
-                if (!flag)
-                {
-                    stream.Dispose();
-                }
+                return ass.GetManifestResourceStream(resourceName);
             }
-            return bitmap;
+
+            throw new FileNotFoundException(string.Format("File not found: {0}", path), path);
         }
 
-        private static Stream GetStream(string file)
+        private static Bitmap GetBitmap(Stream stream)
         {
-            Stream manifestResourceStream;
-            bool length = !File.Exists(file);
-            if (length)
-            {
-                Assembly ass = Assembly.GetAssembly(typeof(NewMap));
-                string[] manifestResourceNames = ass.GetManifestResourceNames();
-                int num = 0;
-                while (true)
-                {
-                    length = num < (int)manifestResourceNames.Length;
-                    if (!length)
-                    {
-                        break;
-                    }
-                    string resourceName = manifestResourceNames[num];
-                    length = !resourceName.EndsWith(file);
-                    if (!length)
-                    {
-                        manifestResourceStream = ass.GetManifestResourceStream(resourceName);
-                        return manifestResourceStream;
-                    }
-                    num++;
-                }
-                throw new FileNotFoundException(string.Format("File not found: {0}", file), file);
-            }
-            else
-            {
-                manifestResourceStream = new FileStream(file, FileMode.Open);
-            }
-            return manifestResourceStream;
+            return new Bitmap(stream);
         }
 
-        protected override void ProcessRecord()
+        private static Graphics GetGraphics(Image bitmap)
         {
-            object[] name;
-            int valueOrDefault;
-            int num;
-            string str;
-            try
-            {
-                bool line = null == this.Line;
-                if (line)
-                {
-                    line = null == this.PointA;
-                    if (!line)
-                    {
-                        int height = 64;
-                        int width = 64;
-                        if (this.IconPath == null || string.IsNullOrEmpty(this.IconPath.Trim()))
-                        {
-                            str = "Airplane.png";
-                        }
-                        else
-                        {
-                            str = this.IconPath;
-                        }
-                        string logo = str;
-                        Point point = this.PointA.ToPoint(this.Bitmap);
-                        name = new object[6];
-                        name[0] = this.Name;
-                        name[1] = this.OriginLatitude;
-                        name[2] = this.OriginLongitude;
-                        name[3] = point.X;
-                        name[4] = point.Y;
-                        name[5] = logo;
-                        this.Debug(string.Format("Drawing point {0} at {1},{2} ({3},{4}) with logo {5}", name));
-                        this.Graphics.DrawImage(NewMap.GetBitmap(logo), point.X - width / 2, point.Y - height / 2, width, height);
-                    }
-                }
-                else
-                {
-                    IEnumerator<KeyValuePair<Point, Point>> enumerator = this.Line.GreatCircle(100).GetLine(this.Bitmap).GetEnumerator();
-                    try
-                    {
-                        while (true)
-                        {
-                            line = enumerator.MoveNext();
-                            if (!line)
-                            {
-                                break;
-                            }
-                            KeyValuePair<Point, Point> p = enumerator.Current;
-                            Point pointA = p.Key;
-                            Point pointB = p.Value;
-                            name = new object[4];
-                            name[0] = pointA.X;
-                            name[1] = pointA.Y;
-                            name[2] = pointB.X;
-                            name[3] = pointB.Y;
-                            this.Debug(string.Format("Drawing line from {0},{1} to {2},{3}", name));
-                            this.Graphics.DrawLine(new Pen(Brushes.HotPink, 4f), pointA, pointB);
-                        }
-                    }
-                    finally
-                    {
-                        line = enumerator == null;
-                        if (!line)
-                        {
-                            enumerator.Dispose();
-                        }
-                    }
-                }
-            }
-            catch (Exception exception)
-            {
-                Exception e = exception;
-                this.Debug(e.ToString());
-                throw e;
-            }
+            return Graphics.FromImage(bitmap);
         }
 
-        protected override void StopProcessing()
-        {
-            this.Debug("Aborting");
-            this.Bitmap.Dispose();
-        }
+        #endregion
 
         #endregion
     }
