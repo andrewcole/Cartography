@@ -21,18 +21,50 @@ namespace Illallangi.Cartography
 
         private Graphics currentGraphics;
 
+        private ImageFormat currentOutputFormat = ImageFormat.Jpeg;
+
+        private string currentInputPath = @"BlueMarble.jpg";
+
+        private string currentIconPath = @"Airport.png";
+
         #endregion
 
         #region Properties
 
         #region Public Properties
 
-        [Parameter(ValueFromPipeline = false, ValueFromPipelineByPropertyName = false)]
-        public string Input
+        #region Common Parameters
+
+        [Parameter]
+        public string InputPath
         {
-            get;
-            set;
+            get
+            {
+                return this.currentInputPath;
+            }
+            set
+            {
+                this.currentInputPath = value;
+            }
         }
+
+        [Parameter(Mandatory = true, Position = 1)]
+        public string OutputPath { get; set; }
+
+        [Parameter(Mandatory = false, ValueFromPipeline = false, ValueFromPipelineByPropertyName = false)]
+        public ImageFormat OutputFormat
+        {
+            get
+            {
+                return this.currentOutputFormat;
+            }
+            set
+            {
+                this.currentOutputFormat = value;
+            }
+        }
+
+        #endregion
 
         [Parameter(ValueFromPipelineByPropertyName = true)]
         public double? OriginLatitude { get; set; }
@@ -60,11 +92,17 @@ namespace Illallangi.Cartography
             }
         }
 
-        [Parameter(ValueFromPipelineByPropertyName = true)]
-        public string Logo
+        [Parameter(Mandatory = false, ValueFromPipeline = false, ValueFromPipelineByPropertyName = true)]
+        public string IconPath
         {
-            get;
-            set;
+            get
+            {
+                return this.currentIconPath;
+            }
+            set
+            {
+                this.currentIconPath = value;
+            }
         }
 
         [Parameter(ValueFromPipelineByPropertyName = true)]
@@ -76,14 +114,6 @@ namespace Illallangi.Cartography
         [Alias("PointName")]
         [Parameter(ValueFromPipelineByPropertyName = true)]
         public string Name { get; set; }
-        
-        [Parameter(ValueFromPipeline = false, ValueFromPipelineByPropertyName = false, Mandatory = true, Position = 1)]
-        [ValidateNotNullOrEmpty]
-        public string Output { get; set; }
-        
-        [Parameter(ValueFromPipeline = false, ValueFromPipelineByPropertyName = false)]
-        [ValidateNotNullOrEmpty]
-        public ImageFormat OutputFormat { get; set; }
 
         public GeoPoint PointA
         {
@@ -346,7 +376,7 @@ namespace Illallangi.Cartography
 
         public NewMap()
         {
-            this.Input = "DefaultInput.jpg";
+            this.InputPath = "DefaultInput.jpg";
             this.OutputFormat = ImageFormat.Jpeg;
         }
 
@@ -359,7 +389,7 @@ namespace Illallangi.Cartography
             try
             {
                 this.Debug("Loading Bitmap");
-                this.Bitmap = NewMap.GetBitmap(this.Input);
+                this.Bitmap = NewMap.GetBitmap(this.InputPath);
                 this.Debug("Done");
             }
             catch (Exception exception)
@@ -388,8 +418,8 @@ namespace Illallangi.Cartography
         protected override void EndProcessing()
         {
             this.DisposeOfGraphics();
-            this.Debug(string.Format("Writing out {1} {0}", Path.GetFullPath(this.Output), this.OutputFormat.ToString()));
-            this.Bitmap.Save(Path.GetFullPath(this.Output), this.OutputFormat);
+            this.Debug(string.Format("Writing out {1} {0}", Path.GetFullPath(this.OutputPath), this.OutputFormat.ToString()));
+            this.Bitmap.Save(Path.GetFullPath(this.OutputPath), this.OutputFormat);
         }
 
         private static Bitmap GetBitmap(string file)
@@ -461,13 +491,13 @@ namespace Illallangi.Cartography
                     {
                         int height = 64;
                         int width = 64;
-                        if (this.Logo == null || string.IsNullOrEmpty(this.Logo.Trim()))
+                        if (this.IconPath == null || string.IsNullOrEmpty(this.IconPath.Trim()))
                         {
                             str = "Airplane.png";
                         }
                         else
                         {
-                            str = this.Logo;
+                            str = this.IconPath;
                         }
                         string logo = str;
                         Point point = this.PointA.ToPoint(this.Bitmap);
