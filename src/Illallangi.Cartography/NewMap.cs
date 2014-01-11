@@ -35,12 +35,10 @@ namespace Illallangi.Cartography
         }
 
         [Parameter(ValueFromPipelineByPropertyName = true)]
-        [Alias(new[] { "Latitude" })]
-        public double? LatitudeA { get; set; }
+        public double? OriginLatitude { get; set; }
         
-        [Alias(new[] { "DestinationLatitude" })]
         [Parameter(ValueFromPipelineByPropertyName = true)]
-        public double? LatitudeB { get; set; }
+        public double? DestinationLatitude { get; set; }
 
         public GeoLine Line
         {
@@ -70,12 +68,10 @@ namespace Illallangi.Cartography
         }
 
         [Parameter(ValueFromPipelineByPropertyName = true)]
-        [Alias("Longitude")]
-        public double? LongitudeA { get; set; }
+        public double? OriginLongitude { get; set; }
         
         [Parameter(ValueFromPipelineByPropertyName = true)]
-        [Alias("DestinationLongitude")]
-        public double? LongitudeB { get; set; }
+        public double? DestinationLongitude { get; set; }
         
         [Alias("PointName")]
         [Parameter(ValueFromPipelineByPropertyName = true)]
@@ -99,17 +95,17 @@ namespace Illallangi.Cartography
                 double valueOrDefault;
                 double num;
                 bool hasValue1;
-                double? longitudeA = this.LongitudeA;
+                double? longitudeA = this.OriginLongitude;
                 if (longitudeA.HasValue)
                 {
-                    longitudeA = this.LatitudeA;
+                    longitudeA = this.OriginLatitude;
                     if (!longitudeA.HasValue)
                     {
                         flag1 = false;
                         flag = flag1;
                         if (flag)
                         {
-                            longitudeA = this.LatitudeA;
+                            longitudeA = this.OriginLatitude;
                             if (longitudeA.HasValue)
                             {
                                 valueOrDefault = (double)((double)longitudeA.GetValueOrDefault());
@@ -118,7 +114,7 @@ namespace Illallangi.Cartography
                             {
                                 valueOrDefault = 0;
                             }
-                            longitudeA = this.LongitudeA;
+                            longitudeA = this.OriginLongitude;
                             if (longitudeA.HasValue)
                             {
                                 num = (double)((double)longitudeA.GetValueOrDefault());
@@ -135,16 +131,16 @@ namespace Illallangi.Cartography
                         }
                         return geoPoint;
                     }
-                    longitudeA = this.LongitudeA;
+                    longitudeA = this.OriginLongitude;
                     bool hasValue;
                     hasValue = longitudeA.GetValueOrDefault() == 0 && longitudeA.HasValue;
-                    longitudeA = this.LatitudeA;
+                    longitudeA = this.OriginLatitude;
                     hasValue1 = longitudeA.GetValueOrDefault() == 0 && longitudeA.HasValue;
                     flag1 = !(hasValue & hasValue1);
                     flag = flag1;
                     if (flag)
                     {
-                        longitudeA = this.LatitudeA;
+                        longitudeA = this.OriginLatitude;
                         if (longitudeA.HasValue)
                         {
                             valueOrDefault = (double)longitudeA.GetValueOrDefault();
@@ -154,7 +150,7 @@ namespace Illallangi.Cartography
                             valueOrDefault = 0;
                         }
 
-                        longitudeA = this.LongitudeA;
+                        longitudeA = this.OriginLongitude;
                         if (longitudeA.HasValue)
                         {
                             num = longitudeA.GetValueOrDefault();
@@ -187,17 +183,17 @@ namespace Illallangi.Cartography
                 double valueOrDefault;
                 double num;
                 bool hasValue1;
-                double? longitudeB = this.LongitudeB;
+                double? longitudeB = this.DestinationLongitude;
                 if (longitudeB.HasValue)
                 {
-                    longitudeB = this.LatitudeB;
+                    longitudeB = this.DestinationLatitude;
                     if (!longitudeB.HasValue)
                     {
                         flag1 = false;
                         flag = flag1;
                         if (flag)
                         {
-                            longitudeB = this.LatitudeB;
+                            longitudeB = this.DestinationLatitude;
                             if (longitudeB.HasValue)
                             {
                                 valueOrDefault = (double)((double)longitudeB.GetValueOrDefault());
@@ -206,7 +202,7 @@ namespace Illallangi.Cartography
                             {
                                 valueOrDefault = 0;
                             }
-                            longitudeB = this.LongitudeB;
+                            longitudeB = this.DestinationLongitude;
                             if (longitudeB.HasValue)
                             {
                                 num = (double)((double)longitudeB.GetValueOrDefault());
@@ -223,7 +219,7 @@ namespace Illallangi.Cartography
                         }
                         return geoPoint;
                     }
-                    longitudeB = this.LongitudeB;
+                    longitudeB = this.DestinationLongitude;
                     bool hasValue;
                     if ((double)longitudeB.GetValueOrDefault() != 0)
                     {
@@ -233,7 +229,7 @@ namespace Illallangi.Cartography
                     {
                         hasValue = longitudeB.HasValue;
                     }
-                    longitudeB = this.LatitudeB;
+                    longitudeB = this.DestinationLatitude;
                     if ((double)longitudeB.GetValueOrDefault() != 0)
                     {
                         hasValue1 = false;
@@ -246,7 +242,7 @@ namespace Illallangi.Cartography
                     flag = flag1;
                     if (flag)
                     {
-                        longitudeB = this.LatitudeB;
+                        longitudeB = this.DestinationLatitude;
                         if (longitudeB.HasValue)
                         {
                             valueOrDefault = (double)((double)longitudeB.GetValueOrDefault());
@@ -255,7 +251,7 @@ namespace Illallangi.Cartography
                         {
                             valueOrDefault = 0;
                         }
-                        longitudeB = this.LongitudeB;
+                        longitudeB = this.DestinationLongitude;
                         if (longitudeB.HasValue)
                         {
                             num = (double)((double)longitudeB.GetValueOrDefault());
@@ -276,7 +272,7 @@ namespace Illallangi.Cartography
                 flag = flag1;
                 if (flag)
                 {
-                    longitudeB = this.LatitudeB;
+                    longitudeB = this.DestinationLatitude;
                     if (longitudeB.HasValue)
                     {
                         valueOrDefault = (double)((double)longitudeB.GetValueOrDefault());
@@ -285,7 +281,7 @@ namespace Illallangi.Cartography
                     {
                         valueOrDefault = 0;
                     }
-                    longitudeB = this.LongitudeB;
+                    longitudeB = this.DestinationLongitude;
                     if (longitudeB.HasValue)
                     {
                         num = (double)((double)longitudeB.GetValueOrDefault());
@@ -477,8 +473,8 @@ namespace Illallangi.Cartography
                         Point point = this.PointA.ToPoint(this.Bitmap);
                         name = new object[6];
                         name[0] = this.Name;
-                        name[1] = this.LatitudeA;
-                        name[2] = this.LongitudeA;
+                        name[1] = this.OriginLatitude;
+                        name[2] = this.OriginLongitude;
                         name[3] = point.X;
                         name[4] = point.Y;
                         name[5] = logo;
