@@ -43,9 +43,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="GeoLine.cs" />
     <Compile Include="GeoLineExtensionMethods.cs" />
     <Compile Include="GeoPoint.cs" />
+    <Compile Include="LineTypeEnum.cs" />
     <Compile Include="NewMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

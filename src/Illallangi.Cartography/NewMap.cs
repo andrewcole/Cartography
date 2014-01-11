@@ -42,6 +42,8 @@ namespace Illallangi.Cartography
 
         private int currentLineWidth = 2;
 
+        private LineTypeEnum currentLineType = LineTypeEnum.GreatCircle;
+
         #endregion
 
         #region Properties
@@ -150,6 +152,19 @@ namespace Illallangi.Cartography
             set
             {
                 this.currentLineWidth = value;
+            }
+        }
+
+        [Parameter(Mandatory = false, ValueFromPipeline = false, ValueFromPipelineByPropertyName = true, ParameterSetName = NewMap.Line)]
+        public LineTypeEnum LineType
+        {
+            get
+            {
+                return this.currentLineType;
+            }
+            set
+            {
+                this.currentLineType = value;
             }
         }
 
@@ -351,6 +366,60 @@ namespace Illallangi.Cartography
             }
         }
 
+        private IEnumerable<Point> GetPoints()
+        {
+            if (NewMap.Line != this.ParameterSetName)
+            {
+                throw new InvalidOperationException("Attempted to get GetPoints when ParameterSet is not Line");
+            }
+
+            switch (this.LineType)
+            {
+                case LineTypeEnum.GreatCircle:
+                    var distance =
+                        Math.Asin(
+                            Math.Sqrt(
+                                Math.Pow(Math.Sin((this.OriginLatitudeRadian - this.DestinationLatitudeRadian) / 2), 2)
+                                + Math.Cos(this.OriginLatitudeRadian)
+                                * Math.Pow(
+                                    Math.Sin((this.OriginLongitudeRadian - this.DestinationLongitudeRadian) / 2),
+                                    2)));
+
+                    for (double f = 0; f <= 1; f += (double)1 / 32)
+                    {
+                        var a = Math.Sin((1 - f) * distance) / Math.Sin(distance);
+                        var b = Math.Sin(f * distance) / Math.Sin(distance);
+
+                        // Calculate 3D Cartesian coordinates of the point
+                        var x = a * Math.Cos(this.OriginLatitudeRadian) * Math.Cos(this.OriginLongitudeRadian) + b * Math.Cos(this.DestinationLatitudeRadian) * Math.Cos(this.DestinationLongitudeRadian);
+                        var y = a * Math.Cos(this.OriginLatitudeRadian) * Math.Sin(this.OriginLongitudeRadian) + b * Math.Cos(this.DestinationLatitudeRadian) * Math.Sin(this.DestinationLongitudeRadian);
+                        var z = a * Math.Sin(this.OriginLatitudeRadian) + b * Math.Sin(this.DestinationLatitudeRadian);
+
+                        var latRadian = Math.Atan2(z, Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2)));
+                        var lonRadian = Math.Atan2(y, x);
+
+                        var lat = latRadian / (Math.PI / 180);
+                        var lon = lonRadian / (Math.PI / 180);
+
+                        yield return new Point((int)(((lon + 180) / 360) * this.InputBitmap.Width), (int)(((180 - (lat + 90)) / 180) * this.InputBitmap.Height));
+                    }
+
+                    break;
+
+                case LineTypeEnum.Straight:
+                    yield return new Point(this.OriginX, this.OriginY);
+                    yield return new Point(this.DestinationX, this.DestinationY);
+                    break;
+
+                case LineTypeEnum.Undefined:
+                    throw new NotImplementedException();
+
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+
         #endregion
 
         #endregion
@@ -375,10 +444,14 @@ namespace Illallangi.Cartography
                     break;
 
                 case NewMap.Line:
-                    this.InputGraphics.DrawLine(
-                        new Pen(this.LineColor, this.LineWidth),
-                        new Point(this.OriginX, this.OriginY),
-                        new Point(this.DestinationX, this.DestinationY));
+                    foreach (var line in this.GetPoints().ToPairs().FixWraparound(this.InputWidth))
+                    {
+                        this.InputGraphics.DrawLine(
+                            new Pen(this.LineColor, this.LineWidth),
+                            line.Item1,
+                            line.Item2);
+                    }
+
                     break;
 
                 default:
