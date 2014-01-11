@@ -132,3 +132,6 @@ packages/
 
 !packages/repositories.config
 !.nuget/nuget.exe
+
+build.log
+artifacts
