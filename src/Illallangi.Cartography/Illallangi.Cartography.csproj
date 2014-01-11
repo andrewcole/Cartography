@@ -50,7 +50,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Illallangi.Cartography.psd1">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Illallangi.Cartography.psm1">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
