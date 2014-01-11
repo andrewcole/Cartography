@@ -147,8 +147,7 @@ namespace Illallangi.Cartography
                 double lon = Math.Atan2(y, x);
 
                 GeoPoint geoPoint1 = GeoPoint.FromRadians(lat, lon);
-                flag = null == geoPoint;
-                if (!flag)
+                if (null != geoPoint)
                 {
                     yield return new GeoLine(geoPoint, geoPoint1);
                 }
