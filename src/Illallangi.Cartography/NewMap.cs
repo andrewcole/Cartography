@@ -376,7 +376,7 @@ namespace Illallangi.Cartography
 
                 case NewMap.Line:
                     this.InputGraphics.DrawLine(
-                        new Pen(Brushes.HotPink, 4),
+                        new Pen(this.LineColor, this.LineWidth),
                         new Point(this.OriginX, this.OriginY),
                         new Point(this.DestinationX, this.DestinationY));
                     break;
